@@ -48,7 +48,7 @@ class WebScraper extends AsyncTask {
                 Log.i("PHONE_TAG", name);
             }
         } catch (IOException ioe) {
-
+            //
         }
         return null;
     }
