@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ListView;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -18,11 +19,14 @@ import java.io.IOException;
 public class MainActivity extends AppCompatActivity {
 
     Button retrieveBtn;
+    ListView listView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        listView = findViewById(R.id.listView);
 
         retrieveBtn = findViewById(R.id.retrieveBtn);
         retrieveBtn.setOnClickListener(view -> {
@@ -43,8 +47,8 @@ class WebScraper extends AsyncTask {
             Document doc = Jsoup.connect(url).get();
             Elements phonesData = doc.select(".module-phones-link");
 
-            for(Element phone : phonesData) {
-                String  name = phone.text();
+            for(int i = 0; i < 5; i++) {
+                String name = phonesData.get(i).text();
                 Log.i("PHONE_TAG", name);
             }
         } catch (IOException ioe) {
