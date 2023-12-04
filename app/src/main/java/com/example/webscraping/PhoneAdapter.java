@@ -11,6 +11,8 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.squareup.picasso.Picasso;
+
 import java.util.ArrayList;
 
 public class PhoneAdapter extends RecyclerView.Adapter<PhoneAdapter.ViewHolder> {
@@ -26,12 +28,14 @@ public class PhoneAdapter extends RecyclerView.Adapter<PhoneAdapter.ViewHolder> 
     @Override
     public PhoneAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.phone_item_layout, parent, false);
-        return new RecyclerView.ViewHolder(view);
+        return new ViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(@NonNull PhoneAdapter.ViewHolder holder, int position) {
-
+        PhoneModel phoneModel = phoneModels.get(position);
+        holder.txtView.setText(phoneModel.getName());
+        Picasso.get().load(phoneModel.getImageUrl()).into(holder.imgView);
     }
 
     @Override

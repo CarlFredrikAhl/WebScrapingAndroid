@@ -18,24 +18,14 @@ import java.io.IOException;
 
 public class MainActivity extends AppCompatActivity {
 
-    Button retrieveBtn;
-    ListView listView;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        listView = findViewById(R.id.listView);
-
-        retrieveBtn = findViewById(R.id.retrieveBtn);
-        retrieveBtn.setOnClickListener(view -> {
-            retrieveBtn.setVisibility(View.INVISIBLE);
-
-            //Retrieve data from web scraping
-            WebScraper webScraper = new WebScraper();
-            webScraper.execute();
-        });
+        //Retrieve data from web scraping
+        WebScraper webScraper = new WebScraper();
+        webScraper.execute();
     }
 }
 
