@@ -1,6 +1,8 @@
 package com.example.webscraping;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -15,13 +17,24 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
+
+    /*RecyclerView recyclerView;
+    PhoneAdapter phoneAdapter;
+    ArrayList<PhoneModel> phoneModels = new ArrayList<>();*/
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        /*recyclerView = findViewById(R.id.recyclerView);
+        recyclerView.setHasFixedSize(true);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        phoneAdapter = new PhoneAdapter(phoneModels, this);
+        recyclerView.setAdapter(phoneAdapter);*/
 
         //Retrieve data from web scraping
         WebScraper webScraper = new WebScraper();
@@ -39,7 +52,8 @@ class WebScraper extends AsyncTask {
 
             for(int i = 0; i < 5; i++) {
                 String name = phonesData.get(i).text();
-                Log.i("PHONE_TAG", name);
+                String imgUrl = phonesData.select(".module-phones-link").select("img").eq(i).attr("src");
+                Log.i("PHONE_TAG", "Name: " + name + ", ImgURL: " + imgUrl);
             }
         } catch (IOException ioe) {
             //d
