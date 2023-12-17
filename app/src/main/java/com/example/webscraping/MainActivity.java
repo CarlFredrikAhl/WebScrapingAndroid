@@ -49,7 +49,7 @@ public class MainActivity extends AppCompatActivity {
             phoneAdapter.notifyDataSetChanged();
         }
         @Override
-        protected Void doInBackground(Void... voids) {
+        protected Void doInBackground(Void... values) {
             try {
                 String url = "https://www.gsmarena.com/";
                 Document doc = Jsoup.connect(url).get();
