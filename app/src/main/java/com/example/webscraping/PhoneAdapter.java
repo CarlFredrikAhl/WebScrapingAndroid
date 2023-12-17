@@ -40,7 +40,7 @@ public class PhoneAdapter extends RecyclerView.Adapter<PhoneAdapter.ViewHolder> 
 
     @Override
     public int getItemCount() {
-        return 0;
+        return phoneModels.size();
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {

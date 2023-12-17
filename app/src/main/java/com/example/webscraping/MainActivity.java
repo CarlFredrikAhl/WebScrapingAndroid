@@ -21,43 +21,53 @@ import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
 
-    /*RecyclerView recyclerView;
+    RecyclerView recyclerView;
     PhoneAdapter phoneAdapter;
-    ArrayList<PhoneModel> phoneModels = new ArrayList<>();*/
+    ArrayList<PhoneModel> phoneModels = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        /*recyclerView = findViewById(R.id.recyclerView);
+        recyclerView = findViewById(R.id.recyclerView);
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         phoneAdapter = new PhoneAdapter(phoneModels, this);
-        recyclerView.setAdapter(phoneAdapter);*/
+        recyclerView.setAdapter(phoneAdapter);
 
         //Retrieve data from web scraping
         WebScraper webScraper = new WebScraper();
         webScraper.execute();
     }
-}
 
-class WebScraper extends AsyncTask {
-    @Override
-    protected Object doInBackground(Object[] objects) {
-        try {
-            String url = "https://www.gsmarena.com/";
-            Document doc = Jsoup.connect(url).get();
-            Elements phonesData = doc.select(".module-phones-link");
+    class WebScraper extends AsyncTask<Void, Void, Void> {
 
-            for(int i = 0; i < 5; i++) {
-                String name = phonesData.get(i).text();
-                String imgUrl = phonesData.select(".module-phones-link").select("img").eq(i).attr("src");
-                Log.i("PHONE_TAG", "Name: " + name + ", ImgURL: " + imgUrl);
-            }
-        } catch (IOException ioe) {
-            //d
+        @Override
+        protected void onProgressUpdate(Void... values) {
+            super.onProgressUpdate(values);
+            phoneAdapter.notifyDataSetChanged();
         }
-        return null;
+        @Override
+        protected Void doInBackground(Void... voids) {
+            try {
+                String url = "https://www.gsmarena.com/";
+                Document doc = Jsoup.connect(url).get();
+                Elements phonesData = doc.select(".module-phones-link");
+
+                for(int i = 0; i < 5; i++) {
+                    String name = phonesData.get(i).text();
+                    String imgUrl = phonesData.select(".module-phones-link").select("img").eq(i).attr("src");
+                    Log.i("PHONE_TAG", "Name: " + name + ", ImgURL: " + imgUrl);
+
+                    //Add the phones to phone models
+                    phoneModels.add(new PhoneModel(name, imgUrl));
+                    publishProgress();
+                }
+            } catch (IOException ioe) {
+                //d
+            }
+            return null;
+        }
     }
 }
