@@ -5,17 +5,17 @@ public class PhoneModel {
     private String imageUrl;
     private String screenSize;
     private String resolution;
-    private String displayType;
+    private String screenType;
     private String phoneWidth;
 
     public PhoneModel() { }
 
-    public PhoneModel(String name, String imageUrl, String screenSize, String resolution, String displayType, String phoneWidth) {
+    public PhoneModel(String name, String imageUrl, String screenSize, String resolution, String screenType, String phoneWidth) {
         this.name = name;
         this.imageUrl = imageUrl;
         this.screenSize = screenSize;
         this.resolution = resolution;
-        this.displayType = displayType;
+        this.screenType = screenType;
         this.phoneWidth = phoneWidth;
     }
 
@@ -31,8 +31,8 @@ public class PhoneModel {
         return screenSize;
     }
 
-    public String getDisplayType() {
-        return displayType;
+    public String getScreenType() {
+        return screenType;
     }
 
     public String getResolution() {

@@ -67,14 +67,13 @@ public class MainActivity extends AppCompatActivity {
                     String screenResolution = phoneSpecsDoc.select("td:contains(Resolution)").next().text();
                     String screenType = phoneSpecsDoc.select("td:contains(Type)").next().text();
                     String phoneDimensions = phoneSpecsDoc.select("td:contains(Dimensions)").next().text();
-                    //String[] test = phoneDimensions.split(" x ");
-                    String phoneWidth = phoneDimensions.split(" x ")[1];
+                    String phoneWidth = phoneDimensions.split(" x ")[1] + " mm";
 
                     Log.i("PHONE_TAG", "Name: " + name + ", screen size: " + screenSize + "screen resolution: " + screenResolution
                     + "screen type" + screenType + "phone width: " + phoneWidth);
 
                     //Add the phones to phone models
-                    phoneModels.add(new PhoneModel(name, imgUrl, "test", "test", "test", "test"));
+                    phoneModels.add(new PhoneModel(name, imgUrl, screenSize, screenResolution, screenType, phoneWidth));
                     publishProgress();
                 }
             } catch (IOException ioe) {

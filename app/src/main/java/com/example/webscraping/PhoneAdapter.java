@@ -34,7 +34,11 @@ public class PhoneAdapter extends RecyclerView.Adapter<PhoneAdapter.ViewHolder> 
     @Override
     public void onBindViewHolder(@NonNull PhoneAdapter.ViewHolder holder, int position) {
         PhoneModel phoneModel = phoneModels.get(position);
-        holder.txtView.setText(phoneModel.getName());
+        holder.txtViewName.setText(phoneModel.getName());
+        holder.txtViewSize.setText(phoneModel.getScreenSize());
+        holder.txtViewResolution.setText(phoneModel.getResolution());
+        holder.txtViewWidth.setText(phoneModel.getPhoneWidth());
+        holder.txtViewType.setText(phoneModel.getScreenType());
         Picasso.get().load(phoneModel.getImageUrl()).into(holder.imgView);
     }
 
@@ -46,13 +50,21 @@ public class PhoneAdapter extends RecyclerView.Adapter<PhoneAdapter.ViewHolder> 
     public class ViewHolder extends RecyclerView.ViewHolder {
 
         ImageView imgView;
-        TextView txtView;
+        TextView txtViewName;
+        TextView txtViewSize;
+        TextView txtViewResolution;
+        TextView txtViewWidth;
+        TextView txtViewType;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
 
             imgView = itemView.findViewById(R.id.phoneImg);
-            txtView = itemView.findViewById(R.id.phoneName);
+            txtViewName = itemView.findViewById(R.id.phoneName);
+            txtViewSize = itemView.findViewById(R.id.screenSize);
+            txtViewResolution = itemView.findViewById(R.id.screenResolution);
+            txtViewWidth = itemView.findViewById(R.id.phoneWidth);
+            txtViewType = itemView.findViewById(R.id.phoneType);
         }
     }
 }
