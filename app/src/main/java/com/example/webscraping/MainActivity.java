@@ -26,6 +26,8 @@ public class MainActivity extends AppCompatActivity {
     PhoneAdapter phoneAdapter;
     ArrayList<PhoneModel> phoneModels = new ArrayList<>();
 
+    String latestPhoneStorage;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -41,9 +43,9 @@ public class MainActivity extends AppCompatActivity {
         WebScraper webScraper = new WebScraper();
         webScraper.execute();
 
-        String latestPhone = PhoneStorage.getLatestPhone(getApplicationContext());
+        latestPhoneStorage = PhoneStorage.getLatestPhone(getApplicationContext());
 
-        Toast.makeText(getApplicationContext(), latestPhone, Toast.LENGTH_SHORT).show();
+        //Toast.makeText(getApplicationContext(), latestPhone, Toast.LENGTH_SHORT).show();
     }
 
     class WebScraper extends AsyncTask<Void, Void, Void> {
@@ -63,7 +65,9 @@ public class MainActivity extends AppCompatActivity {
                 latestPhone = phonesData.get(0).text();
 
                 //Save to sharedpreferences
-                PhoneStorage.saveLatestPhone(getApplicationContext(), latestPhone);
+                if(!latestPhone.equals(latestPhoneStorage)) {
+                    PhoneStorage.saveLatestPhone(getApplicationContext(), latestPhone);
+                }
 
                 for(int i = 0; i < 5; i++) {
                     String name = phonesData.get(i).text();
