@@ -10,6 +10,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -39,6 +40,10 @@ public class MainActivity extends AppCompatActivity {
         //Retrieve data from web scraping
         WebScraper webScraper = new WebScraper();
         webScraper.execute();
+
+        String latestPhone = PhoneStorage.getLatestPhone(getApplicationContext());
+
+        Toast.makeText(getApplicationContext(), latestPhone, Toast.LENGTH_SHORT).show();
     }
 
     class WebScraper extends AsyncTask<Void, Void, Void> {
@@ -54,6 +59,11 @@ public class MainActivity extends AppCompatActivity {
                 String url = "https://www.gsmarena.com/";
                 Document doc = Jsoup.connect(url).get();
                 Elements phonesData = doc.select(".module-phones-link");
+                String latestPhone = "";
+                latestPhone = phonesData.get(0).text();
+
+                //Save to sharedpreferences
+                PhoneStorage.saveLatestPhone(getApplicationContext(), latestPhone);
 
                 for(int i = 0; i < 5; i++) {
                     String name = phonesData.get(i).text();
@@ -67,7 +77,12 @@ public class MainActivity extends AppCompatActivity {
                     String screenResolution = phoneSpecsDoc.select("td:contains(Resolution)").next().text();
                     String screenType = phoneSpecsDoc.select("td:contains(Type)").next().text();
                     String phoneDimensions = phoneSpecsDoc.select("td:contains(Dimensions)").next().text();
-                    String phoneWidth = phoneDimensions.split(" x ")[1] + " mm";
+                    String phoneWidth = "";
+
+                    //Check if the dimensions are known
+                    if(phoneDimensions.contains("x")) {
+                        phoneWidth = phoneDimensions.split(" x ")[1] + " mm";
+                    }
 
                     Log.i("PHONE_TAG", "Name: " + name + ", screen size: " + screenSize + "screen resolution: " + screenResolution
                     + "screen type" + screenType + "phone width: " + phoneWidth);
@@ -76,9 +91,11 @@ public class MainActivity extends AppCompatActivity {
                     phoneModels.add(new PhoneModel(name, imgUrl, screenSize, screenResolution, screenType, phoneWidth));
                     publishProgress();
                 }
+
             } catch (IOException ioe) {
-                //d
+
             }
+
             return null;
         }
     }
