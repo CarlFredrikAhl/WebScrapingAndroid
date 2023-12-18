@@ -110,6 +110,7 @@ public class PhoneCheckService extends JobIntentService {
                 .setSmallIcon(R.drawable.android_phone_icon)
                 .setContentTitle("New phone!")
                 .setContentText(message)
+                .setStyle(new NotificationCompat.BigPictureStyle().bigPicture(bitmap).bigLargeIcon(null))
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT);
 
         //Show notification
