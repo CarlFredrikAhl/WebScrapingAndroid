@@ -10,6 +10,8 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Build;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.widget.RemoteViews;
 import android.widget.Toast;
@@ -62,7 +64,7 @@ public class PhoneCheckService extends JobService {
                     String screenResolution = phoneSpecsDoc.select("td:contains(Resolution)").next().text();
                     String screenType = phoneSpecsDoc.select("td:contains(Type)").next().text();
                     String phoneDimensions = phoneSpecsDoc.select("td:contains(Dimensions)").next().text();
-                    String phoneWidth = "";
+                    String phoneWidth = "-";
 
                     //Check if the dimensions are known
                     if(phoneDimensions.contains("x")) {
@@ -77,19 +79,25 @@ public class PhoneCheckService extends JobService {
                     Picasso.get().load(newPhone.getImageUrl()).into(new Target() {
                         @Override
                         public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
-                            showNotification(newPhone, bitmap);
+                            new Handler(Looper.getMainLooper()).post(new Runnable() {
+                                @Override
+                                public void run() {
+                                    showNotification(newPhone, bitmap);
+                                }
+                            });
                         }
 
                         @Override
                         public void onBitmapFailed(Exception e, Drawable errorDrawable) {
-
+                            // Handle failure
                         }
 
                         @Override
                         public void onPrepareLoad(Drawable placeHolderDrawable) {
-
+                            // Prepare for loading
                         }
                     });
+
                     //}
 
                 } catch (IOException ioe) {
