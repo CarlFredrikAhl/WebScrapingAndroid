@@ -9,7 +9,7 @@ import java.util.Calendar;
 
 public class AlarmManagerHelper {
     private static final int ALARM_REQUEST_CODE = 1001;
-    private static final long ALARM_INTERVAL = 10000; //AlarmManager.INTERVAL_HALF_HOUR;
+    public static final long ALARM_INTERVAL = 5000; //AlarmManager.INTERVAL_HALF_HOUR;
 
     public static void startAlarm(Context context) {
         AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);

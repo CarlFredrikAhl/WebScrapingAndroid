@@ -2,10 +2,13 @@ package com.example.webscraping;
 
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.app.job.JobParameters;
+import android.app.job.JobService;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.util.Log;
 import android.widget.RemoteViews;
@@ -24,74 +27,88 @@ import org.jsoup.select.Elements;
 
 import java.io.IOException;
 
-public class PhoneCheckService extends JobIntentService {
+public class PhoneCheckService extends JobService {
     static final int JOB_ID = 1000;
 
     @Override
-    protected void onHandleWork(@NonNull Intent intent) {
-        //Check for new phones and send notification if new phone
-        try {
-            String url = "https://www.gsmarena.com/";
-            Document doc = Jsoup.connect(url).get();
-            Elements phonesData = doc.select(".module-phones-link");
-            String latestPhone = "";
-            latestPhone = phonesData.get(0).text();
+    public boolean onStartJob(JobParameters params) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                Log.i("PhoneCheckService", "onStartJob");
 
-            String latestPhoneStorage = PhoneStorage.getLatestPhone(getApplicationContext());
+                //Check for new phones and send notification if new phone
+                try {
+                    String url = "https://www.gsmarena.com/";
+                    Document doc = Jsoup.connect(url).get();
+                    Elements phonesData = doc.select(".module-phones-link");
+                    String latestPhone = "";
+                    latestPhone = phonesData.get(0).text();
 
-            //Save to sharedpreferences
-            //if(!latestPhone.equals(latestPhoneStorage)) {
-                //Send notification that new phone has come out
+                    String latestPhoneStorage = PhoneStorage.getLatestPhone(getApplicationContext());
 
-                String name = phonesData.get(0).text();
-                String imgUrl = phonesData.select("img").eq(0).attr("src");
-                String phoneUrl = phonesData.eq(0).attr("href");
-                String completePhoneUrl = url + phoneUrl;
+                    //Save to sharedpreferences
+                    //if(!latestPhone.equals(latestPhoneStorage)) {
+                    //Send notification that new phone has come out
 
-                //Visit each individual phone link to extract data about them
-                Document phoneSpecsDoc = Jsoup.connect(completePhoneUrl).get();
-                String screenSize = phoneSpecsDoc.select("td:contains(Size)").next().text();
-                String screenResolution = phoneSpecsDoc.select("td:contains(Resolution)").next().text();
-                String screenType = phoneSpecsDoc.select("td:contains(Type)").next().text();
-                String phoneDimensions = phoneSpecsDoc.select("td:contains(Dimensions)").next().text();
-                String phoneWidth = "";
+                    String name = phonesData.get(0).text();
+                    String imgUrl = phonesData.select("img").eq(0).attr("src");
+                    String phoneUrl = phonesData.eq(0).attr("href");
+                    String completePhoneUrl = url + phoneUrl;
 
-                //Check if the dimensions are known
-                if(phoneDimensions.contains("x")) {
-                    phoneWidth = phoneDimensions.split(" x ")[1] + " mm";
+                    //Visit each individual phone link to extract data about them
+                    Document phoneSpecsDoc = Jsoup.connect(completePhoneUrl).get();
+                    String screenSize = phoneSpecsDoc.select("td:contains(Size)").next().text();
+                    String screenResolution = phoneSpecsDoc.select("td:contains(Resolution)").next().text();
+                    String screenType = phoneSpecsDoc.select("td:contains(Type)").next().text();
+                    String phoneDimensions = phoneSpecsDoc.select("td:contains(Dimensions)").next().text();
+                    String phoneWidth = "";
+
+                    //Check if the dimensions are known
+                    if(phoneDimensions.contains("x")) {
+                        phoneWidth = phoneDimensions.split(" x ")[1] + " mm";
+                    }
+
+                    Log.i("PHONE_TAG", "Name: " + name + ", screen size: " + screenSize + "screen resolution: " + screenResolution
+                            + "screen type" + screenType + "phone width: " + phoneWidth);
+
+                    PhoneModel newPhone = new PhoneModel(name, imgUrl, screenSize, screenResolution, screenType, phoneWidth);
+
+                    Picasso.get().load(newPhone.getImageUrl()).into(new Target() {
+                        @Override
+                        public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
+                            showNotification(newPhone, bitmap);
+                        }
+
+                        @Override
+                        public void onBitmapFailed(Exception e, Drawable errorDrawable) {
+
+                        }
+
+                        @Override
+                        public void onPrepareLoad(Drawable placeHolderDrawable) {
+
+                        }
+                    });
+                    //}
+
+                } catch (IOException ioe) {
+
                 }
 
-                Log.i("PHONE_TAG", "Name: " + name + ", screen size: " + screenSize + "screen resolution: " + screenResolution
-                        + "screen type" + screenType + "phone width: " + phoneWidth);
+                jobFinished(params, false);
 
-                PhoneModel newPhone = new PhoneModel(name, imgUrl, screenSize, screenResolution, screenType, phoneWidth);
+            }
+        }).start();
 
-                Picasso.get().load(newPhone.getImageUrl()).into(new Target() {
-                    @Override
-                    public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
-                        showNotification(newPhone, bitmap);
-                    }
-
-                    @Override
-                    public void onBitmapFailed(Exception e, Drawable errorDrawable) {
-
-                    }
-
-                    @Override
-                    public void onPrepareLoad(Drawable placeHolderDrawable) {
-
-                    }
-                });
-            //}
-
-        } catch (IOException ioe) {
-
-        }
+        return true;
     }
 
-    static void enqueWork(Context context, Intent work) {
-        enqueueWork(context, PhoneCheckService.class, JOB_ID, work);
+    @Override
+    public boolean onStopJob(JobParameters params) {
+        return true;
     }
+
 
     private void showNotification(PhoneModel phone, Bitmap bitmap) {
 
@@ -117,5 +134,6 @@ public class PhoneCheckService extends JobIntentService {
 
         notificationManager.notify(1, notification.build());
     }
+
 }
 
