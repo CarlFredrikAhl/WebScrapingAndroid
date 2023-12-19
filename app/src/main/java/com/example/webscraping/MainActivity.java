@@ -17,6 +17,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ListView;
+import android.widget.RemoteViews;
 import android.widget.Toast;
 
 import com.squareup.picasso.Picasso;
@@ -61,10 +62,10 @@ public class MainActivity extends AppCompatActivity {
         //Toast.makeText(getApplicationContext(), latestPhone, Toast.LENGTH_SHORT).show();
     }
 
-    class TestNotification extends AsyncTask<Void, Void, Void> {
+    class TestNotification extends AsyncTask<Void, Void, PhoneModel> {
 
         @Override
-        protected Void doInBackground(Void... voids) {
+        protected PhoneModel doInBackground(Void... voids) {
             try {
                 String url = "https://www.gsmarena.com/";
                 Document doc = Jsoup.connect(url).get();
@@ -98,18 +99,7 @@ public class MainActivity extends AppCompatActivity {
 
                     PhoneModel newPhone = new PhoneModel(name, imgUrl, screenSize, screenResolution, screenType, phoneWidth);
 
-                // Load the image in the background
-                Bitmap bitmap = Picasso.get().load(newPhone.getImageUrl()).get();
-
-                String message = newPhone.getName() + "\n" +
-                        newPhone.getScreenSize() + "\n" +
-                        newPhone.getResolution() + "\n" +
-                        newPhone.getPhoneWidth() + "\n" +
-                        newPhone.getScreenType();
-
-                // Show notification on the UI thread
-                showNotification(message, bitmap);
-
+                    return newPhone;
 
             } catch (IOException ioe) {
 
@@ -118,7 +108,31 @@ public class MainActivity extends AppCompatActivity {
             return null;
         }
 
-        private void showNotification(String message, Bitmap bitmap) {
+        @Override
+        protected void onPostExecute(PhoneModel newPhone) {
+            if(newPhone != null) {
+                try {
+                    Picasso.get().load(newPhone.getImageUrl()).into(new Target() {
+                        @Override
+                        public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
+                            showNotification(newPhone, bitmap);
+                        }
+
+                        @Override
+                        public void onBitmapFailed(Exception e, Drawable errorDrawable) {
+
+                        }
+
+                        @Override
+                        public void onPrepareLoad(Drawable placeHolderDrawable) {
+
+                        }
+                    });
+                } catch (Exception e) {}
+            }
+        }
+
+        private void showNotification(PhoneModel phone, Bitmap bitmap) {
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
@@ -129,16 +143,20 @@ public class MainActivity extends AppCompatActivity {
                         notificationManager.createNotificationChannel(channel);
                     }
 
-                    //Build notification
-                    NotificationCompat.Builder builder = new NotificationCompat.Builder(getApplicationContext(), "channel_id")
+                    RemoteViews remoteViews = new RemoteViews(getPackageName(), R.layout.notification_layout_expanded);
+                    remoteViews.setTextViewText(R.id.notificationName, phone.getName());
+                    remoteViews.setTextViewText(R.id.notificationSize, phone.getScreenSize());
+                    remoteViews.setTextViewText(R.id.notificationResolution, phone.getResolution());
+                    remoteViews.setTextViewText(R.id.notificationWidth, phone.getPhoneWidth());
+                    remoteViews.setTextViewText(R.id.notificationType, phone.getScreenType());
+                    remoteViews.setImageViewBitmap(R.id.notification_img, bitmap);
+
+                    NotificationCompat.Builder notification = new NotificationCompat.Builder(getApplicationContext(), "channel_id")
                             .setSmallIcon(R.drawable.android_phone_icon)
-                            .setContentTitle("New phone!")
-                            .setContentText(message)
-                            .setStyle(new NotificationCompat.BigPictureStyle().bigPicture(bitmap).bigLargeIcon(null))
+                            .setCustomBigContentView(remoteViews)
                             .setPriority(NotificationCompat.PRIORITY_DEFAULT);
 
-                    //Show notification
-                    notificationManager.notify(1, builder.build());
+                    notificationManager.notify(1, notification.build());
                 }
             });
         }
