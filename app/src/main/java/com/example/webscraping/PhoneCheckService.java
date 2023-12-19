@@ -8,6 +8,8 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.util.Log;
+import android.widget.RemoteViews;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.JobIntentService;
@@ -38,7 +40,7 @@ public class PhoneCheckService extends JobIntentService {
             String latestPhoneStorage = PhoneStorage.getLatestPhone(getApplicationContext());
 
             //Save to sharedpreferences
-            if(!latestPhone.equals(latestPhoneStorage)) {
+            //if(!latestPhone.equals(latestPhoneStorage)) {
                 //Send notification that new phone has come out
 
                 String name = phonesData.get(0).text();
@@ -67,13 +69,7 @@ public class PhoneCheckService extends JobIntentService {
                 Picasso.get().load(newPhone.getImageUrl()).into(new Target() {
                     @Override
                     public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
-                        String message = newPhone.getName() + "\n" +
-                                newPhone.getScreenSize() + "\n" +
-                                newPhone.getResolution() + "\n" +
-                                newPhone.getPhoneWidth() + "\n" +
-                                newPhone.getScreenType();
-
-                        showNotification(message, bitmap);
+                        showNotification(newPhone, bitmap);
                     }
 
                     @Override
@@ -86,7 +82,7 @@ public class PhoneCheckService extends JobIntentService {
 
                     }
                 });
-            }
+            //}
 
         } catch (IOException ioe) {
 
@@ -97,7 +93,8 @@ public class PhoneCheckService extends JobIntentService {
         enqueueWork(context, PhoneCheckService.class, JOB_ID, work);
     }
 
-    private void showNotification(String message, Bitmap bitmap) {
+    private void showNotification(PhoneModel phone, Bitmap bitmap) {
+
         NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -105,15 +102,20 @@ public class PhoneCheckService extends JobIntentService {
             notificationManager.createNotificationChannel(channel);
         }
 
-        //Build notification
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, "channel_id")
+        RemoteViews remoteViews = new RemoteViews(getPackageName(), R.layout.notification_layout_expanded);
+        remoteViews.setTextViewText(R.id.notificationName, phone.getName());
+        remoteViews.setTextViewText(R.id.notificationSize, phone.getScreenSize());
+        remoteViews.setTextViewText(R.id.notificationResolution, phone.getResolution());
+        remoteViews.setTextViewText(R.id.notificationWidth, phone.getPhoneWidth());
+        remoteViews.setTextViewText(R.id.notificationType, phone.getScreenType());
+        remoteViews.setImageViewBitmap(R.id.notification_img, bitmap);
+
+        NotificationCompat.Builder notification = new NotificationCompat.Builder(getApplicationContext(), "channel_id")
                 .setSmallIcon(R.drawable.android_phone_icon)
-                .setContentTitle("New phone!")
-                .setContentText(message)
-                .setStyle(new NotificationCompat.BigPictureStyle().bigPicture(bitmap).bigLargeIcon(null))
+                .setCustomBigContentView(remoteViews)
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT);
 
-        //Show notification
-        notificationManager.notify(1, builder.build());
+        notificationManager.notify(1, notification.build());
     }
 }
+

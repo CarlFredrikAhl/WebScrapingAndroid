@@ -50,16 +50,18 @@ public class MainActivity extends AppCompatActivity {
         phoneAdapter = new PhoneAdapter(phoneModels, this);
         recyclerView.setAdapter(phoneAdapter);
 
-        TestNotification testNotification = new TestNotification();
-        testNotification.execute();
+        AlarmManagerHelper.startAlarm(getApplicationContext());
+
+//        TestNotification testNotification = new TestNotification();
+//        testNotification.execute();
 
         //Retrieve data from web scraping
-//        WebScraper webScraper = new WebScraper();
-//        webScraper.execute();
-//
-//        latestPhoneStorage = PhoneStorage.getLatestPhone(getApplicationContext());
+        WebScraper webScraper = new WebScraper();
+        webScraper.execute();
 
-        //Toast.makeText(getApplicationContext(), latestPhone, Toast.LENGTH_SHORT).show();
+        latestPhoneStorage = PhoneStorage.getLatestPhone(getApplicationContext());
+
+        //Toast.makeText(getApplicationContext(), latestPhoneStorage, Toast.LENGTH_SHORT).show();
     }
 
     class TestNotification extends AsyncTask<Void, Void, PhoneModel> {
@@ -133,32 +135,28 @@ public class MainActivity extends AppCompatActivity {
         }
 
         private void showNotification(PhoneModel phone, Bitmap bitmap) {
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
-                    if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                        NotificationChannel channel = new NotificationChannel("channel_id", "Channel Name", NotificationManager.IMPORTANCE_DEFAULT);
-                        notificationManager.createNotificationChannel(channel);
-                    }
+            NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
-                    RemoteViews remoteViews = new RemoteViews(getPackageName(), R.layout.notification_layout_expanded);
-                    remoteViews.setTextViewText(R.id.notificationName, phone.getName());
-                    remoteViews.setTextViewText(R.id.notificationSize, phone.getScreenSize());
-                    remoteViews.setTextViewText(R.id.notificationResolution, phone.getResolution());
-                    remoteViews.setTextViewText(R.id.notificationWidth, phone.getPhoneWidth());
-                    remoteViews.setTextViewText(R.id.notificationType, phone.getScreenType());
-                    remoteViews.setImageViewBitmap(R.id.notification_img, bitmap);
+            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                NotificationChannel channel = new NotificationChannel("channel_id", "Channel Name", NotificationManager.IMPORTANCE_DEFAULT);
+                notificationManager.createNotificationChannel(channel);
+            }
 
-                    NotificationCompat.Builder notification = new NotificationCompat.Builder(getApplicationContext(), "channel_id")
-                            .setSmallIcon(R.drawable.android_phone_icon)
-                            .setCustomBigContentView(remoteViews)
-                            .setPriority(NotificationCompat.PRIORITY_DEFAULT);
+            RemoteViews remoteViews = new RemoteViews(getPackageName(), R.layout.notification_layout_expanded);
+            remoteViews.setTextViewText(R.id.notificationName, phone.getName());
+            remoteViews.setTextViewText(R.id.notificationSize, phone.getScreenSize());
+            remoteViews.setTextViewText(R.id.notificationResolution, phone.getResolution());
+            remoteViews.setTextViewText(R.id.notificationWidth, phone.getPhoneWidth());
+            remoteViews.setTextViewText(R.id.notificationType, phone.getScreenType());
+            remoteViews.setImageViewBitmap(R.id.notification_img, bitmap);
 
-                    notificationManager.notify(1, notification.build());
-                }
-            });
+            NotificationCompat.Builder notification = new NotificationCompat.Builder(getApplicationContext(), "channel_id")
+                    .setSmallIcon(R.drawable.android_phone_icon)
+                    .setCustomBigContentView(remoteViews)
+                    .setPriority(NotificationCompat.PRIORITY_DEFAULT);
+
+            notificationManager.notify(1, notification.build());
         }
     }
 
